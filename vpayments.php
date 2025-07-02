@@ -3,14 +3,14 @@
 $url = 'https://www.zohoapis.in/books/v3/vendorpayments?organization_id=60008266217&date=2025-01-15';
 
 // Your OAuth token and refresh token
-$access_token = '1000.e7b452e37417ddef932249e97f6c6437.0d8704c36a45e18c7f0c8dd385102c96';
-$refresh_token = '1000.ed6fec2963d2b763e454264e59085d29.9fc6b5936996f531d4136f5ada280698';
+$access_token = '1000.2ffd0a14d1c6999b515c95f7cf2e8374.85f2b973b1bc53a1782364ee65309868';
+$refresh_token = '1000.60e90e1b4772d0c026cb615437c35541.4292106f120fbdea4dd8b528bc995d81';
 
 // MySQL connection setup
 $servername = "190.92.174.90";
-$username = "tanishkaenter_user"; 
-$password = "Tanishka_User123!"; 
-$dbname = "tanishkaenter_test";
+$username = "abptone_trading_zoho_user"; // Change this to your MySQL username
+$password = "Strait@9760!"; // Change this to your MySQL password
+$dbname = "abptone_trading_zoho";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -25,8 +25,8 @@ function refreshAccessToken($refresh_token) {
     $url = 'https://accounts.zoho.in/oauth/v2/token';
     $data = [
         'refresh_token' => $refresh_token,
-        'client_id' => '1000.GO9NDA38HWZ4N5ZHLOXYM6XH1F4WVA', 
-        'client_secret' => 'ed089fb96e6269ee0c08b6f7f1bae44272ea1b1f9f', 
+        'client_id' => '1000.E0UC7XOAL21FNJIM7GIJA53JNIAJ3Q', // Your client ID
+        'client_secret' => 'fa29b16691413821946cbe4e885373acdbbab1b908', // Your client secret
         'grant_type' => 'refresh_token'
     ];
     

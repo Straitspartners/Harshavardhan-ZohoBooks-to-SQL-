@@ -7,14 +7,14 @@ error_reporting(E_ALL);
 $url = 'https://www.zohoapis.in/books/v3/contacts?organization_id=60008266217&cf_created_date=2025-01-23&contact_type=vendor';  // Adjust this URL for your actual Zoho API endpoint
 
 // Your OAuth token and refresh token
-$access_token = '1000.e7b452e37417ddef932249e97f6c6437.0d8704c36a45e18c7f0c8dd385102c96';
-$refresh_token = '1000.ed6fec2963d2b763e454264e59085d29.9fc6b5936996f531d4136f5ada280698'; // Update with your actual refresh token
+$access_token = '1000.2ffd0a14d1c6999b515c95f7cf2e8374.85f2b973b1bc53a1782364ee65309868';
+$refresh_token = '1000.60e90e1b4772d0c026cb615437c35541.4292106f120fbdea4dd8b528bc995d81';
 
 // MySQL connection setup
 $servername = "190.92.174.90";
-$username = "tanishkaenter_user"; // MySQL username
-$password = "Tanishka_User123!"; // MySQL password
-$dbname = "tanishkaenter_test";
+$username = "abptone_trading_zoho_user"; // Change this to your MySQL username
+$password = "Strait@9760!"; // Change this to your MySQL password
+$dbname = "abptone_trading_zoho";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -29,8 +29,8 @@ function refreshAccessToken($refresh_token) {
     $url = 'https://accounts.zoho.in/oauth/v2/token';
     $data = [
         'refresh_token' => $refresh_token,
-        'client_id' => '1000.GO9NDA38HWZ4N5ZHLOXYM6XH1F4WVA', // Your client ID
-        'client_secret' => 'ed089fb96e6269ee0c08b6f7f1bae44272ea1b1f9f', // Your client secret
+        'client_id' => '1000.E0UC7XOAL21FNJIM7GIJA53JNIAJ3Q', // Your client ID
+        'client_secret' => 'fa29b16691413821946cbe4e885373acdbbab1b908', // Your client secret
         'grant_type' => 'refresh_token'
     ];
 
@@ -80,7 +80,7 @@ do {
     ]);
     curl_setopt($ch, CURLOPT_CAINFO, 'C:\php-8.4.2\extras\ssl\cacert.pem');
     $response = curl_exec($ch);
-    
+   
     // Check for cURL errors
     if (curl_errno($ch)) {
         echo 'cURL error: ' . curl_error($ch);
@@ -133,12 +133,13 @@ foreach ($all_vendors as $vendor) {
        
         if (isset($vendor_data['contact'])) {
             $vendor = $vendor_data['contact'];
+
             //$vendor_id= isset($vendor['contact_id']) ? $vendor['contact_id'] : null;
             // Extract the details for this specific vendor using the vendor_id
-            $beneficiary_name = isset($vendor['beneficiary_name']) ? $vendor['beneficiary_name'] : null;
+            // $beneficiary_name = isset($vendor['beneficiary_name']) ? $vendor['beneficiary_name'] : null;
             $gst_no = isset($vendor['gst_no']) ? $vendor['gst_no'] : null;
             $price_list = isset($vendor['pricebook_name']) ? $vendor['pricebook_name'] : null;
-            $source_of_supply = isset($vendor['place_of_contact']) ? $vendor['place_of_contact'] : null;
+            $place_of_supply = isset($vendor['place_of_contact']) ? $vendor['place_of_contact'] : null;
             
 
             $contact_persons = is_array($vendor['contact_persons']) ? json_encode($vendor['contact_persons']) : $vendor['contact_persons'];
@@ -158,7 +159,7 @@ foreach ($all_vendors as $vendor) {
                     foreach ($vendor['bank_accounts'] as $vendors) {
                        // print_r($vendors);
                          $invoice_details[] = [
-                             'beneficiary_name' => $vendors['beneficiary_name'] ?? 'N/A', // Replace with a default if missing
+                            //  'beneficiary_name' => $vendors['beneficiary_name'] ?? 'N/A', // Replace with a default if missing
                              'account_number' => $vendors['account_number'] ?? 'N/A', // Replace with a default if missing
                              'routing_number' => $vendors['routing_number'] ?? 'N/A', // Replace with a default if missing
                              'bank_name' => $vendors['bank_name'] ?? 'N/A', // Replace with a default if missing
@@ -170,7 +171,7 @@ foreach ($all_vendors as $vendor) {
                 else {
                     // When there are no invoices
                     $invoice_details[] = [
-                        'beneficiary_name' => 'N/A',
+                        // 'beneficiary_name' => 'N/A',
                         'account_number' => 'N/A',
                         'routing_number' => 'N/A',
                         'bank_name' => 'N/A'
@@ -203,9 +204,29 @@ foreach ($all_vendors as $vendor) {
             $udyam_no = isset($vendor['udyam_reg_no']) ? $vendor['udyam_reg_no'] : null;
             $udyam_type = isset($vendor['msme_type']) ? $vendor['msme_type'] : null;
 
+            $cust_market = isset($vendor['cf_market']) ? $vendor['cf_market'] : null;
+            $cf_custo_code = isset($vendor['cf_cust_code']) ? $vendor['cf_cust_code'] : null;
+
+            // Shipping details
+            $shipping_address = isset($vendor['shipping_address']['address']) ? $vendor['shipping_address']['address'] : null;
+            $shipping_attention = isset($vendor['shipping_address']['attention']) ? $vendor['shipping_address']['attention'] : null;
+            $shipping_street = isset($vendor['shipping_address']['street2']) ? $vendor['shipping_address']['street2'] : null;
+            $shipping_city = isset($vendor['shipping_address']['city']) ? $vendor['shipping_address']['city'] : null;
+            $shipping_state = isset($vendor['shipping_address']['state']) ? $vendor['shipping_address']['state'] : null;
+            $shipping_country = isset($vendor['shipping_address']['country']) ? $vendor['shipping_address']['country'] : null;
+            $shipping_code = isset($vendor['shipping_address']['zip']) ? $vendor['shipping_address']['zip'] : null;
+            $shipping_phone = isset($vendor['shipping_address']['phone']) ? $vendor['shipping_address']['phone'] : null;
+
+            $display_name = isset($vendor['contact_name']) ? $vendor['contact_name'] : null;
+            $company_name = isset($vendor['company_name']) ? $vendor['company_name'] : null;
+            $payment_terms = isset($vendor['payment_terms']) ? $vendor['payment_terms'] : null;
+           
+
+
+
             // Now insert or update into the database
             // Check if the vendor already exists in your database (using vendor_code)
-            $stmt = $conn->prepare("SELECT * FROM fitok_all_vendors WHERE vendor_code = ?");
+            $stmt = $conn->prepare("SELECT * FROM trading_vendors WHERE vendor_code = ?");
             $stmt->bind_param("s", $vendor_code);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -213,22 +234,26 @@ foreach ($all_vendors as $vendor) {
             if ($result->num_rows === 0) {
                 echo "Inserting new vendor: $vendor_name\n";
                 // Insert the vendor into the database
-                $stmt = $conn->prepare("INSERT INTO fitok_all_vendors 
-                (vendor_id,beneficiary_name, vendor_code, gst_no, price_list, source_of_supply, vendor_warehouse, vendor_status, vendor_name,
-                contact_fname, contact_lname, contact_mobile_no, contact_phn_no, contatct_email_id,  
-                billing_address, billing_attention, billing_city, billing_code, billing_country, 
-                billing_phone, billing_state, billing_street, created_at, updated_at, currency_code,
-                vendor_bank_acct_no, vendor_bank_code, vendor_bank_name, udyam_no, udyam_type)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                $stmt = $conn->prepare("INSERT INTO trading_vendors 
+                (vendor_id, vendor_code, gst_no, price_list, place_of_supply, cust_wh, vendor_status, contact_name,
+                first_name, last_name, mobile_no, phn_no, email_id,  
+                billing_address, billing_attention, billing_city, billing_pincode, billing_country, 
+                billing_phone, billing_state, billing_street, created_at, updated_at, currency_code,shipping_address, shipping_attention, 
+    shipping_street, shipping_city, shipping_state, shipping_country, shipping_pincode, 
+    shipping_phone,display_name, company_name, cust_market, cust_code,payment_terms
+                   )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             
              
 
-            $stmt->bind_param("ssssssssssssssssssssssssssssss", 
-                $vendor_id, $last_value['beneficiary_name'], $vendor_code, $gst_no, $price_list, $source_of_supply, $vendor_warehouse, $vendor_status,  $vendor_name,
+            $stmt->bind_param("sssssssssssssssssssssssssssssssssssss", 
+                $vendor_id, $vendor_code, $gst_no, $price_list, $place_of_supply, $vendor_warehouse, $vendor_status,  $vendor_name,
                 $contact_fname, $contact_lname, $contact_mobile_no, $contact_phn_no, $contact_email,  
                 $billing_address, $billing_attention, $billing_city, $billing_code, $billing_country, 
-                $billing_phone, $billing_state, $billing_street, $created_at, $updated_at, $currency_code,
-                $last_value['account_number'], $last_value['routing_number'], $last_value['bank_name'], $udyam_no, $udyam_type
+                $billing_phone, $billing_state, $billing_street, $created_at, $updated_at, $currency_code,$shipping_address, $shipping_attention,
+                $shipping_street, $shipping_city, $shipping_state, $shipping_country, $shipping_code,
+                $shipping_phone, $display_name, $company_name,$cust_market, $cf_custo_code, $payment_terms
+                
             );
             
                 $stmt->execute();
@@ -314,10 +339,10 @@ if (!empty($up_cp))
                 $vendor = $vendor_data['contact'];
                 //$vendor_id= isset($vendor['contact_id']) ? $vendor['contact_id'] : null;
                 // Extract the details for this specific vendor using the vendor_id
-                $beneficiary_name = isset($vendor['beneficiary_name']) ? $vendor['beneficiary_name'] : null;
+                // $beneficiary_name = isset($vendor['beneficiary_name']) ? $vendor['beneficiary_name'] : null;
                 $gst_no = isset($vendor['gst_no']) ? $vendor['gst_no'] : null;
                 $price_list = isset($vendor['pricebook_name']) ? $vendor['pricebook_name'] : null;
-                $source_of_supply = isset($vendor['place_of_contact']) ? $vendor['place_of_contact'] : null;
+                $place_of_supply = isset($vendor['place_of_contact']) ? $vendor['place_of_contact'] : null;
                 
     
                 $contact_persons = is_array($vendor['contact_persons']) ? json_encode($vendor['contact_persons']) : $vendor['contact_persons'];
@@ -337,7 +362,7 @@ if (!empty($up_cp))
                         foreach ($vendor['bank_accounts'] as $vendors) {
                            // print_r($vendors);
                              $up_invoices[] = [
-                                 'beneficiary_name' => $vendors['beneficiary_name'] ?? 'N/A', // Replace with a default if missing
+                                //  'beneficiary_name' => $vendors['beneficiary_name'] ?? 'N/A', // Replace with a default if missing
                                  'account_number' => $vendors['account_number'] ?? 'N/A', // Replace with a default if missing
                                  'routing_number' => $vendors['routing_number'] ?? 'N/A', // Replace with a default if missing
                                  'bank_name' => $vendors['bank_name'] ?? 'N/A', // Replace with a default if missing
@@ -349,7 +374,7 @@ if (!empty($up_cp))
                     else {
                         // When there are no invoices
                         $up_invoices[] = [
-                            'beneficiary_name' => 'N/A',
+                            // 'beneficiary_name' => 'N/A',
                             'account_number' => 'N/A',
                             'routing_number' => 'N/A',
                             'bank_name' => 'N/A'
@@ -371,8 +396,22 @@ if (!empty($up_cp))
                 $billing_phone = isset($vendor['billing_address']['phone']) ? $vendor['billing_address']['phone'] : null;
                 $billing_state = isset($vendor['billing_address']['state']) ? $vendor['billing_address']['state'] : null;
                 $billing_street = isset($vendor['billing_address']['street2']) ? $vendor['billing_address']['street2'] : null;
-               
-    
+
+                // Shipping details
+                $shipping_address = isset($vendor['shipping_address']['address']) ? $vendor['shipping_address']['address'] : null;
+                $shipping_attention = isset($vendor['shipping_address']['attention']) ? $vendor['shipping_address']['attention'] : null;
+                $shipping_street = isset($vendor['shipping_address']['street2']) ? $vendor['shipping_address']['street2'] : null;
+                $shipping_city = isset($vendor['shipping_address']['city']) ? $vendor['shipping_address']['city'] : null;
+                $shipping_state = isset($vendor['shipping_address']['state']) ? $vendor['shipping_address']['state'] : null;
+                $shipping_country = isset($vendor['shipping_address']['country']) ? $vendor['shipping_address']['country'] : null;
+                $shipping_code = isset($vendor['shipping_address']['zip']) ? $vendor['shipping_address']['zip'] : null;
+                $shipping_phone = isset($vendor['shipping_address']['phone']) ? $vendor['shipping_address']['phone'] : null;
+
+                $display_name = isset($vendor['contact_name']) ? $vendor['contact_name'] : null;
+                $company_name = isset($vendor['company_name']) ? $vendor['company_name'] : null;
+
+                $cust_market = isset($vendor['cf_market']) ? $vendor['cf_market'] : null;
+                $cf_custo_code = isset($vendor['cf_cust_code']) ? $vendor['cf_cust_code'] : null;
     
                 $vendor_code = isset($vendor['cf_cust_code']) ? $vendor['cf_cust_code'] : null;
                 $vendor_name = isset($vendor['contact_name']) ? $vendor['contact_name'] : null;
@@ -381,30 +420,43 @@ if (!empty($up_cp))
                 $vendor_status = isset($vendor['status']) ? $vendor['status'] : null;
                 $udyam_no = isset($vendor['udyam_reg_no']) ? $vendor['udyam_reg_no'] : null;
                 $udyam_type = isset($vendor['msme_type']) ? $vendor['msme_type'] : null;
+                $payment_terms = isset($vendor['payment_terms']) ? $vendor['payment_terms'] : null;
 
 
 
 
-            $result = $conn->query("SELECT * FROM fitok_all_vendors WHERE vendor_id = '$vendor_id'");
+            $result = $conn->query("SELECT * FROM trading_vendors WHERE vendor_id = '$vendor_id'");
             if ($result->num_rows > 0) {
                 // Prepare the statement if the record exists
-                $stmt = $conn->prepare("UPDATE fitok_all_vendors SET 
-                beneficiary_name= ?, vendor_code= ?, gst_no= ?, price_list= ?, source_of_supply= ?, vendor_warehouse= ?, vendor_status= ?, vendor_name= ?,
-                 contact_fname= ?, contact_lname= ?, contact_mobile_no= ?, contact_phn_no= ?, contatct_email_id= ?,  
-                 billing_address= ?, billing_attention= ?, billing_city= ?, billing_code= ?, billing_country= ?, 
+                $stmt = $conn->prepare("UPDATE trading_vendors SET 
+                 vendor_code= ?, gst_no= ?, price_list= ?, place_of_supply= ?, cust_wh= ?, vendor_status= ?, contact_name= ?,
+                 first_name=?, last_name=?, mobile_no=?, phn_no=?, email_id=?,  
+                 billing_address= ?, billing_attention= ?, billing_city= ?, billing_pincode= ?, billing_country= ?, 
                  billing_phone= ?, billing_state= ?, billing_street= ?, created_at= ?, updated_at= ?, currency_code= ?,
-                 vendor_bank_acct_no= ?, vendor_bank_code= ?, vendor_bank_name= ?, udyam_no=?, udyam_type= ? WHERE vendor_id = ?");
+                 shipping_address = ?, 
+                 
+    cust_market = ?, 
+    shipping_attention = ?, 
+    shipping_street = ?, 
+    shipping_city = ?, 
+    shipping_state = ?, 
+    shipping_country = ?, 
+    shipping_pincode = ?, 
+    shipping_phone = ?,display_name = ?, 
+    company_name = ?,payment_terms=?  WHERE vendor_id = ?");
                   //$invoices = $up_invoices[1];
                   //print_r($invoices);          
                 
                 // Check if preparation was successful
                 if ($stmt) {
-                    $stmt->bind_param("ssssssssssssssssssssssssssssss",
-                    $last_valuee['beneficiary_name'], $vendor_code, $gst_no, $price_list, $source_of_supply, $vendor_warehouse, $vendor_status,  $vendor_name,
+                    $stmt->bind_param("ssssssssssssssssssssssssssssssssssss",
+                     $vendor_code, $gst_no, $price_list, $place_of_supply, $vendor_warehouse, $vendor_status,  $vendor_name,
                     $contact_fname, $contact_lname, $contact_mobile_no, $contact_phn_no, $contact_email,  
                     $billing_address, $billing_attention, $billing_city, $billing_code, $billing_country, 
                     $billing_phone, $billing_state, $billing_street, $created_at, $updated_at, $currency_code,
-                    $last_valuee['account_number'], $last_valuee['routing_number'], $last_valuee['bank_name'], $udyam_no, $udyam_type,$vendor_id);
+                    $shipping_address, $shipping_attention, 
+    $shipping_street, $shipping_city, $shipping_state, $shipping_country, $shipping_code, 
+    $shipping_phone, $display_name, $company_name,$cust_market,$payment_terms, $vendor_id);
              
                     
                     
@@ -470,16 +522,16 @@ if (!empty($del_items))
                            
         $upitem_id = $itemdel['cf_contact_id']; 
         //print_r($upitem_id);
-    }
-}
+   
+
 
 
     if ($upitem_id != null) {
         // Delete invoice if not in the API data
 
-        $conn->query("DELETE FROM fitok_all_vendors WHERE vendor_id = '$upitem_id'");
+        $conn->query("DELETE FROM trading_vendors WHERE vendor_id = '$upitem_id'");
         echo "$upitem_id  ID deleted from database.<br>";
-    }
+    } }}
 
 
 
