@@ -137,6 +137,7 @@ if (!empty($all_payments)) {
                 $vendor_payment_date = $payment['date'];
                 $vendor_payment_amt = isset($payment['amount']) ? $payment['amount'] : 0.00;
                 $currency_code = isset($payment['currency_code']) ? $payment['currency_code'] : '';
+                $location_name= isset($payment['location_name']) ? $payment['location_name'] : '';
                 $vendor_payment_mode = $payment['payment_mode'];
                 $vendor_payment_desc = isset($payment['description']) ? $payment['description'] : 'No description available';
                 $exchange_rate = isset($payment['exchange_rate']) ? $payment['exchange_rate'] : 1.00; // Default if missing
@@ -146,12 +147,12 @@ if (!empty($all_payments)) {
                 $reference_no = isset($payment['reference_number']) ? $payment['reference_number'] : null;
                 $payment_type = $payment['payment_mode'];
                 
-                 $result = $conn->query("SELECT * FROM fitok_vendor_payment WHERE vendor_payment_no = '{$payment['payment_number']}' AND bill_no = '{$bill_no}'");
+                 $result = $conn->query("SELECT * FROM trading_vendor_payment WHERE payment_no = '{$payment['payment_number']}' AND bill_no = '{$bill_no}'");
                 if ($result->num_rows == 0) {
                     // Insert new payment into the database
-                    $stmt = $conn->prepare("INSERT INTO fitok_vendor_payment (bank_charges, bill_amt, bill_date, bill_no, currency_code, exchange_rate, foreign_bank_charges, payment_type, reference_no, vendor_name, vendor_payment_amt, vendor_payment_date, vendor_payment_desc, vendor_payment_mode, vendor_payment_no) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    $stmt = $conn->prepare("INSERT INTO trading_vendor_payment (bank_charges, bill_amt, bill_date, bill_no, currency_code, exchange_rate, foreign_bank_charges, payment_type, reference_no, vendor_name, payment_amt, payment_date, payment_desc, payment_mode, payment_no, location_name) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-                    $stmt->bind_param("sssssdsssssssss", $bank_charges, $bill_amt, $bill_date, $bill_no, $currency_code, $exchange_rate, $foreign_bank_charges, $payment_type, $reference_no, $vendor_name, $vendor_payment_amt, $vendor_payment_date, $vendor_payment_desc, $vendor_payment_mode, $payment['payment_number']);
+                    $stmt->bind_param("sssssdssssssssss", $bank_charges, $bill_amt, $bill_date, $bill_no, $currency_code, $exchange_rate, $foreign_bank_charges, $payment_type, $reference_no, $vendor_name, $vendor_payment_amt, $vendor_payment_date, $vendor_payment_desc, $vendor_payment_mode, $payment['payment_number'],$location_name);
 
                     if ($stmt->execute()) {
                         echo "Payment {$payment['payment_number']} with Bill No: {$bill_no} inserted successfully!<br>";
@@ -250,6 +251,7 @@ if (!empty($up_cp))
                 $payment_number = $payment['payment_number'];
                 $vendor_payment_date = $payment['date'];
                 $vendor_payment_amt = isset($payment['amount']) ? $payment['amount'] : 0.00;
+                $location_name= isset($payment['location_name']) ? $payment['location_name'] : '';
                 $currency_code = isset($payment['currency_code']) ? $payment['currency_code'] : '';
                 $vendor_payment_mode = $payment['payment_mode'];
                 $vendor_payment_desc = isset($payment['description']) ? $payment['description'] : 'No description available';
@@ -261,14 +263,14 @@ if (!empty($up_cp))
 
 
 
-                 $result = $conn->query("SELECT * FROM fitok_vendor_payment WHERE vendor_payment_no = '$payment_number' AND  bill_no='$bill_no' ");
+                 $result = $conn->query("SELECT * FROM trading_vendor_payment WHERE payment_no = '$payment_number' AND  bill_no='$bill_no' ");
             if ($result->num_rows > 0) {
                 // Prepare the statement if the record exists
-                $stmt = $conn->prepare("UPDATE fitok_vendor_payment SET bank_charges = ?, bill_amt = ?, bill_date = ?, currency_code = ?, exchange_rate = ?, foreign_bank_charges = ?, payment_type = ?, reference_no = ?, vendor_name = ?, vendor_payment_amt = ?, vendor_payment_date = ?, vendor_payment_desc = ?, vendor_payment_mode = ?   WHERE vendor_payment_no = ? AND bill_no = ?");
+                $stmt = $conn->prepare("UPDATE trading_vendor_payment SET bank_charges = ?, bill_amt = ?, bill_date = ?, currency_code = ?, exchange_rate = ?, foreign_bank_charges = ?, payment_type = ?, reference_no = ?, vendor_name = ?, payment_amt = ?, payment_date = ?, payment_desc = ?, payment_mode = ? ,location_name=?  WHERE payment_no = ? AND bill_no = ?");
                
                 // Check if preparation was successful
                 if ($stmt) {
-                    $stmt->bind_param("ssssdssssssssss",$bank_charges, $bill_amt, $bill_date, $currency_code, $exchange_rate, $foreign_bank_charges, $payment_type, $reference_no, $vendor_name, $vendor_payment_amt, $vendor_payment_date, $vendor_payment_desc, $vendor_payment_mode, $payment_number, $bill_no);
+                    $stmt->bind_param("ssssdsssssssssss",$bank_charges, $bill_amt, $bill_date, $currency_code, $exchange_rate, $foreign_bank_charges, $payment_type, $reference_no, $vendor_name, $vendor_payment_amt, $vendor_payment_date, $vendor_payment_desc, $vendor_payment_mode, $payment_number, $bill_no,$location_name);
                     
                     if ($stmt->execute()) {
                         echo "Invoice {$payment_number} updated successfully!<br>";
@@ -333,17 +335,17 @@ if (!empty($del_items))
     {
                            
         $upitem_id = $itemdel['cf_payment_id']; 
-    }
-}
+
 
 
     if ($upitem_id != null) {
         // Delete invoice if not in the API data
 
-        $conn->query("DELETE FROM fitok_vendor_payment WHERE vendor_payment_no = '$upitem_id'");
+        $conn->query("DELETE FROM trading_vendor_payment WHERE payment_no = '$upitem_id'");
         echo "$upitem_id  ID deleted from database.<br>";
     }
-
+    }
+}
 
 
 

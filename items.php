@@ -3,14 +3,14 @@
 $url = 'https://www.zohoapis.in/books/v3/items?organization_id=60008266217&cf_created_date=2025-01-17';  // Adjust this URL as per your actual Zoho API endpoint
 
 // Your OAuth token and refresh token
-$access_token = '1000.e7b452e37417ddef932249e97f6c6437.0d8704c36a45e18c7f0c8dd385102c96';
-$refresh_token = '1000.ed6fec2963d2b763e454264e59085d29.9fc6b5936996f531d4136f5ada280698'; // Update with your actual refresh token
+$access_token = '1000.2ffd0a14d1c6999b515c95f7cf2e8374.85f2b973b1bc53a1782364ee65309868';
+$refresh_token = '1000.60e90e1b4772d0c026cb615437c35541.4292106f120fbdea4dd8b528bc995d81';
 
 // MySQL connection setup
 $servername = "190.92.174.90";
-$username = "tanishkaenter_user"; // MySQL username
-$password = "Tanishka_User123!"; // MySQL password
-$dbname = "tanishkaenter_test";
+$username = "abptone_trading_zoho_user"; // Change this to your MySQL username
+$password = "Strait@9760!"; // Change this to your MySQL password
+$dbname = "abptone_trading_zoho";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -25,8 +25,8 @@ function refreshAccessToken($refresh_token) {
     $url = 'https://accounts.zoho.in/oauth/v2/token';
     $data = [
         'refresh_token' => $refresh_token,
-        'client_id' => '1000.GO9NDA38HWZ4N5ZHLOXYM6XH1F4WVA', // Your client ID
-        'client_secret' => 'ed089fb96e6269ee0c08b6f7f1bae44272ea1b1f9f', // Your client secret
+        'client_id' => '1000.E0UC7XOAL21FNJIM7GIJA53JNIAJ3Q', // Your client ID
+        'client_secret' => 'fa29b16691413821946cbe4e885373acdbbab1b908', // Your client secret
         'grant_type' => 'refresh_token'
     ];
 
@@ -171,14 +171,14 @@ if($api_name == "cf_part_type")
 
                  }
     // Check if the item already exists in your database
-    $stmt = $conn->prepare("SELECT * FROM fitok_items WHERE item_name = ?");
+    $stmt = $conn->prepare("SELECT * FROM trading_items WHERE item_name = ?");
     $stmt->bind_param("s", $item_name);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows === 0) {
         // Item doesn't exist, insert a new record
-        $stmt = $conn->prepare("INSERT INTO fitok_items (item_id, item_name, item_desc, purchase_price, selling_price, wh_name, part_type,category_name, item_brand, stock_in_hand, created_at, updated_at , factory_special_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO trading_items (item_id, item_name, purchase_desc, purchase_price, selling_price, wh_name, part_type,category_name, item_brand, stock_on_hand, created_at, updated_at , factory_special_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sssssssssssss",$item_id, $item_name, $item_desc, $purchase_price, $selling_price, $wh_name, $cf_part_type, $category_name, $item_brand, $stock_in_hand, $created_at, $updated_at,$cf_variable_purchase_price);
         $stmt->execute();
     }
@@ -319,11 +319,11 @@ if (!empty($up_items))
 }
  }
 
-    $result = $conn->query("SELECT * FROM fitok_items  WHERE item_id  = '$item_id'");
+    $result = $conn->query("SELECT * FROM trading_items  WHERE item_id  = '$item_id'");
                                         if ($result->num_rows > 0)
                                                {
                                                 
-                                                             $stmt = $conn->prepare("UPDATE fitok_items  SET  item_name = ?, item_desc = ?, purchase_price = ?, selling_price = ?, wh_name = ?, part_type = ?, category_name = ?, item_brand = ?, stock_in_hand = ?, created_at = ?, updated_at = ?, factory_special_price = ? WHERE item_id = ? ");
+                                                             $stmt = $conn->prepare("UPDATE trading_items  SET  item_name = ?, purchase_desc = ?, purchase_price = ?, selling_price = ?, wh_name = ?, part_type = ?, category_name = ?, item_brand = ?, stock_on_hand = ?, created_at = ?, updated_at = ?, factory_special_price = ? WHERE item_id = ? ");
                                                              $stmt->bind_param("sssssssssssss", $item_name, $item_desc, $purchase_price, $selling_price, $wh_name, $cf_part_type, $category_name, $item_brand, $stock_in_hand, $created_at, $updated_at, $cf_variable_purchase_price,$item_id);
                                           
                                               if ($stmt->execute()) {
@@ -389,7 +389,7 @@ if (!empty($del_items))
 
     if ($upitem_id != null) {
         // Delete invoice if not in the API data
-        $conn->query("DELETE FROM fitok_items WHERE item_id = '$upitem_id'");
+        $conn->query("DELETE FROM trading_items WHERE item_id = '$upitem_id'");
         echo "$upitem_id  ID deleted from database.<br>";
     }
 
